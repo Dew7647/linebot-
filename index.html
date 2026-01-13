@@ -49,9 +49,9 @@
       <select id="location-select" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500">
         <option value="">-- เลือกสถานที่ หรือระบุพิกัดเอง --</option>
         <option value="custom">🔍 ดึงพิกัดจากตำแหน่งปัจจุบันของฉัน</option>
-        <option value="custom">🏫 จุฬาลงกรณ์มหาวิทยาลัย (100m)</option>
-        <option value="custom">🏢 ม.เกษตรศาสตร์ (100m)</option>
-       <option value="custom">🏢 สนามกีฬาพระองค์ดำ (100m)</option>
+        <option value="13.7367,100.5231,100">🏫 จุฬาลงกรณ์มหาวิทยาลัย (100m)</option>
+        <option value="13.7942,100.3229,100">🏢 ม.เกษตรศาสตร์ (100m)</option>
+        <option value="custom">🏢สนามกีฬาพระองค์ดำ</option>
       </select>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
        <input type="number" id="target-lat" placeholder="ละติจูด" readonly class="px-3 py-2 border rounded-lg text-sm bg-gray-100">
@@ -120,7 +120,7 @@
 
   <script>
     // --- 1. CONFIGURATION ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycW5jAG7szHJ_quODo9zOE80XWK8IIXPbW2NQRfrZqbOWMp_SN6BDbwzVc3YXqMjTU/exec"; //
+    const SCRIPT_URL = "วาง_SCRIPT_URL_ที่ได้จาก_APPS_SCRIPT_ตรงนี้"; //
     let currentLocation = null;
     let localRecords = [];
 
@@ -269,9 +269,4 @@
     getCurrentLocation();
   </script>
  </body>
-
 </html>
-
-
-
-
