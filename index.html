@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="th" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบเช็คชื่อกิจกรรม (Google Sheets)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { box-sizing: border-box; font-family: 'Sarabun', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-shadow { box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+    .slide-up { animation: slideUp 0.3s ease-out; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .toast { animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100; }
+    @keyframes toastIn { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+    @keyframes toastOut { from { transform: translate(-50%, 0); opacity: 1; } to { transform: translate(-50%, -100%); opacity: 0; } }
+  </style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto gradient-bg">
+   <div id="toast-container"></div>
+   
+   <header class="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div>
+       <h1 id="app-title" class="text-2xl font-bold text-white">ระบบเช็คชื่อกิจกรรม</h1>
+       <p id="organization" class="text-white/70 text-sm">มหาวิทยาลัย</p>
+      </div>
+      <div id="location-status" class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-200">
+        📍 กำลังตรวจสอบพิกัด...
+      </div>
+    </div>
+   </header>
+
+   <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div class="bg-white rounded-2xl card-shadow p-6 slide-up">
+     <div class="flex items-center gap-4 mb-6">
+      <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center text-2xl">📋</div>
+      <div class="flex-1">
+       <h2 id="activity-name" class="text-xl font-bold text-gray-800">กิจกรรมค่ายอาสา</h2>
+       <p class="text-gray-500 text-sm" id="current-datetime"></p>
+      </div>
+     </div>
+
+     <div class="bg-gray-50 rounded-xl p-4 space-y-3">
+      <h3 class="font-semibold text-gray-700 flex items-center gap-2"><span>📍</span> ตั้งค่าพิกัดจุดจัดกิจกรรม</h3>
+      <select id="location-select" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500">
+        <option value="">-- เลือกสถานที่ หรือระบุพิกัดเอง --</option>
+        <option value="custom">🔍 ดึงพิกัดจากตำแหน่งปัจจุบันของฉัน</option>
+        <option value="13.7367,100.5231,100">🏫 จุฬาลงกรณ์มหาวิทยาลัย (100m)</option>
+        <option value="13.7942,100.3229,100">🏢 ม.เกษตรศาสตร์ (100m)</option>
+      </select>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+       <input type="number" id="target-lat" placeholder="ละติจูด" readonly class="px-3 py-2 border rounded-lg text-sm bg-gray-100">
+       <input type="number" id="target-lng" placeholder="ลองจิจูด" readonly class="px-3 py-2 border rounded-lg text-sm bg-gray-100">
+       <input type="number" id="allowed-radius" placeholder="รัศมี (เมตร)" readonly class="px-3 py-2 border rounded-lg text-sm bg-gray-100">
+      </div>
+     </div>
+    </div>
+
+    <div class="bg-white rounded-2xl card-shadow p-6 slide-up">
+     <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><span>✍️</span> บันทึกข้อมูลนักศึกษา</h3>
+     <form id="checkin-form" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <input type="text" id="student-id" required placeholder="รหัสนักศึกษา" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500">
+       <input type="text" id="student-name" required placeholder="ชื่อ-นามสกุล" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500">
+      </div>
+      <div class="flex gap-3">
+        <label class="flex-1 cursor-pointer">
+          <input type="radio" name="check-type" value="เข้า" checked class="sr-only peer">
+          <div class="py-3 text-center border-2 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:text-green-700">🟢 เช็คเข้า</div>
+        </label>
+        <label class="flex-1 cursor-pointer">
+          <input type="radio" name="check-type" value="ออก" class="sr-only peer">
+          <div class="py-3 text-center border-2 rounded-xl peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700">🔴 เช็คออก</div>
+        </label>
+      </div>
+      <button type="submit" id="submit-btn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg hover:opacity-90 transition-all">
+        ✅ ส่งข้อมูลไปที่ Google Sheet
+      </button>
+     </form>
+    </div>
+
+    <div class="bg-white rounded-2xl card-shadow p-6 slide-up text-center">
+     <h3 class="font-bold text-gray-800 mb-4 text-left">📱 สร้าง QR Code เช็คชื่อ</h3>
+     <div class="flex gap-4 mb-4">
+      <button onclick="generateQRCode('เข้า')" class="flex-1 py-3 bg-green-500 text-white rounded-xl font-bold">QR เข้า</button>
+      <button onclick="generateQRCode('ออก')" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold">QR ออก</button>
+     </div>
+     <div id="qr-container" class="hidden bg-gray-50 p-6 rounded-xl inline-block">
+      <div id="qr-code"></div>
+      <p id="qr-label" class="mt-4 font-bold text-gray-700"></p>
+     </div>
+    </div>
+
+    <div class="bg-white rounded-2xl card-shadow p-6 slide-up overflow-hidden">
+     <h3 class="font-bold text-gray-800 mb-4">📊 ประวัติการส่งข้อมูล (รอบปัจจุบัน)</h3>
+     <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+       <thead>
+        <tr class="bg-gray-50 border-b">
+         <th class="px-4 py-3">รหัส</th>
+         <th class="px-4 py-3">ชื่อ</th>
+         <th class="px-4 py-3">ประเภท</th>
+         <th class="px-4 py-3">สถานะ</th>
+         <th class="px-4 py-3">ระยะทาง</th>
+        </tr>
+       </thead>
+       <tbody id="records-body" class="divide-y">
+        <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">ยังไม่มีการบันทึก</td></tr>
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </main>
+  </div>
+
+  <script>
+    // --- 1. CONFIGURATION ---
+    const SCRIPT_URL = "วาง_SCRIPT_URL_ที่ได้จาก_APPS_SCRIPT_ตรงนี้"; //
+    let currentLocation = null;
+    let localRecords = [];
+
+    // --- 2. UTILS ---
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white px-8 py-4 rounded-2xl shadow-2xl font-bold`;
+      toast.textContent = msg;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2;
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
+
+    // --- 3. CORE FUNCTIONS ---
+    async function getCurrentLocation() {
+      const statusBox = document.getElementById('location-status');
+      if (!navigator.geolocation) return null;
+      
+      return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (p) => {
+            currentLocation = { lat: p.coords.latitude, lng: p.coords.longitude };
+            statusBox.className = 'px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-200';
+            statusBox.textContent = '📍 พิกัดพร้อม';
+            resolve(currentLocation);
+          },
+          () => {
+            statusBox.className = 'px-3 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-200';
+            statusBox.textContent = '📍 ปิด GPS';
+            resolve(null);
+          }
+        );
+      });
+    }
+
+    async function handleLocationSelect(e) {
+      const val = e.target.value;
+      if (val === 'custom') {
+        const loc = await getCurrentLocation();
+        if (loc) {
+          document.getElementById('target-lat').value = loc.lat.toFixed(6);
+          document.getElementById('target-lng').value = loc.lng.toFixed(6);
+          document.getElementById('allowed-radius').value = 50;
+          showToast("ใช้ตำแหน่งปัจจุบันเป็นจุดเช็คชื่อ (รัศมี 50ม.)");
+        }
+      } else if (val !== "") {
+        const [lat, lng, rad] = val.split(',');
+        document.getElementById('target-lat').value = lat;
+        document.getElementById('target-lng').value = lng;
+        document.getElementById('allowed-radius').value = rad;
+      }
+    }
+
+    // --- 4. FORM SUBMISSION (GOOGLESHEET CONNECT) ---
+    document.getElementById('checkin-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = "⏳ กำลังบันทึกลง Google Sheets...";
+
+      const studentId = document.getElementById('student-id').value;
+      const studentName = document.getElementById('student-name').value;
+      const type = document.querySelector('input[name="check-type"]:checked').value;
+      const activity = document.getElementById('activity-name').textContent;
+
+      const loc = await getCurrentLocation();
+      const tLat = parseFloat(document.getElementById('target-lat').value);
+      const tLng = parseFloat(document.getElementById('target-lng').value);
+      const rad = parseFloat(document.getElementById('allowed-radius').value) || 100;
+
+      let distance = loc && !isNaN(tLat) ? calculateDistance(loc.lat, loc.lng, tLat, tLng) : null;
+      let status = distance === null ? "ไม่ระบุพิกัด" : (distance <= rad ? "อยู่ในพื้นที่" : "นอกพื้นที่");
+
+      const payload = {
+        student_id: studentId,
+        student_name: studentName,
+        activity_name: activity,
+        check_type: type,
+        latitude: loc ? loc.lat : "",
+        longitude: loc ? loc.lng : "",
+        distance: distance ? distance.toFixed(2) : "",
+        status: status
+      };
+
+      try {
+        // ส่งข้อมูลไปยัง Google Apps Script
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors', //
+          cache: 'no-cache',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        showToast(`บันทึกการเช็ค${type}สำเร็จ!`);
+        localRecords.unshift(payload);
+        updateTable();
+        document.getElementById('checkin-form').reset();
+      } catch (err) {
+        showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "✅ ส่งข้อมูลไปที่ Google Sheet";
+      }
+    };
+
+    function updateTable() {
+      const tbody = document.getElementById('records-body');
+      tbody.innerHTML = localRecords.map(r => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-3 font-bold">${r.student_id}</td>
+          <td class="px-4 py-3">${r.student_name}</td>
+          <td class="px-4 py-3 text-${r.check_type === 'เข้า' ? 'green' : 'red'}-600 font-medium">${r.check_type}</td>
+          <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${r.status === 'อยู่ในพื้นที่' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${r.status}</span></td>
+          <td class="px-4 py-3 text-gray-500">${r.distance || '-'} ม.</td>
+        </tr>
+      `).join('');
+    }
+
+    function generateQRCode(type) {
+      const qrData = JSON.stringify({
+        type: type,
+        activity: document.getElementById('activity-name').textContent,
+        time: new Date().toISOString()
+      });
+      const cont = document.getElementById('qr-container');
+      cont.classList.remove('hidden');
+      document.getElementById('qr-code').innerHTML = '';
+      QRCode.toCanvas(document.getElementById('qr-code'), qrData, { width: 180 });
+      document.getElementById('qr-label').textContent = `QR สำหรับเช็ค${type}`;
+    }
+
+    // Init
+    setInterval(() => {
+      document.getElementById('current-datetime').textContent = new Date().toLocaleString('th-TH');
+    }, 1000);
+    document.getElementById('location-select').onchange = handleLocationSelect;
+    getCurrentLocation();
+  </script>
+ </body>
+</html>
