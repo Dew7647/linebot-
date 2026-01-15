@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSRU กิจกรรมนักศึกษา</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
+    .nav-active { color: #7c3aed; border-top: 3px solid #7c3aed; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body class="h-full flex flex-col">
+
+  <div id="login-screen" class="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-indigo-600 to-purple-700">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm">
+      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">เข้าสู่ระบบสแกนกิจกรรม</h2>
+      <form id="login-form" class="space-y-4">
+        <input type="text" id="sid" placeholder="รหัสนักศึกษา" required class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
+        <input type="password" id="bday" placeholder="วันเกิด (ววดดปปปป)" required class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
+        <button type="submit" id="login-btn" class="w-full py-3 bg-purple-600 text-white rounded-xl font-bold shadow-lg">เข้าสู่ระบบ</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app-screen" class="hidden flex-1 flex flex-col overflow-hidden">
+    <header class="bg-white p-4 shadow-sm flex justify-between items-center">
+      <div>
+        <h1 id="user-name" class="font-bold text-gray-800">ชื่อนักศึกษา</h1>
+        <p id="user-id" class="text-xs text-gray-500"></p>
+      </div>
+      <button onclick="location.reload()" class="text-xs text-red-500 font-bold border border-red-200 px-3 py-1 rounded-lg">ออก</button>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4 space-y-4">
+      
+      <section id="menu-checkin" class="space-y-4">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h3 class="font-bold mb-4 flex items-center gap-2">📍 สแกนเช็คชื่อ</h3>
+          <select id="location" class="w-full p-3 bg-gray-50 border rounded-xl mb-4">
+            <option value="">-- เลือกสถานที่ --</option>
+            <option value="16.8202,100.2255,100">อาคารวชิรโชติ</option>
+            <option value="16.8193,100.2272,150">สนามกีฬา</option>
+          </select>
+          <div class="flex gap-2 mb-4">
+            <label class="flex-1 text-center p-3 border rounded-xl cursor-pointer has-[:checked]:bg-purple-50 has-[:checked]:border-purple-500">
+              <input type="radio" name="ctype" value="เข้า" checked class="hidden">เช็คเข้า
+            </label>
+            <label class="flex-1 text-center p-3 border rounded-xl cursor-pointer has-[:checked]:bg-purple-50 has-[:checked]:border-purple-500">
+              <input type="radio" name="ctype" value="ออก" class="hidden">เช็คออก
+            </label>
+          </div>
+          <button id="btn-save" class="w-full py-4 bg-purple-600 text-white rounded-xl font-bold">✅ บันทึกกิจกรรม</button>
+        </div>
+      </section>
+
+      <section id="menu-stats" class="hidden space-y-4">
+        <div class="bg-purple-600 p-8 rounded-3xl text-white text-center shadow-lg">
+          <p class="text-purple-200">ชั่วโมงสะสมรวม</p>
+          <h2 id="display-hours" class="text-6xl font-black my-2">0</h2>
+          <p class="text-sm opacity-80">นับจากการเช็คชื่อ "เข้า" ในระบบ</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-gray-100">
+          <p class="text-sm text-gray-500">หมายเหตุ: หากชั่วโมงไม่ตรง กรุณาติดต่อฝ่ายกิจกรรมนักศึกษา</p>
+        </div>
+      </section>
+
+    </main>
+
+    <nav class="bg-white border-t flex justify-around py-3 pb-8 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+      <button onclick="tab('checkin')" id="nav-checkin" class="flex flex-col items-center flex-1 nav-active">
+        <span class="text-xl">📍</span><span class="text-[10px] font-bold">เช็คชื่อ</span>
+      </button>
+      <button onclick="tab('stats')" id="nav-stats" class="flex flex-col items-center flex-1 text-gray-400">
+        <span class="text-xl">📊</span><span class="text-[10px] font-bold">สถิติ</span>
+      </button>
+    </nav>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmMBKAi6qLsLuGzOCm_BgsxUMlwvq7-5X-h-eLoy2nefwYDrIoDnsB1UDhjvjO7hn6/exec";
+    let user = null;
+
+    // ระบบ Login
+    document.getElementById('login-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true; btn.innerText = "กำลังเข้าสู่ระบบ...";
+
+      const data = {
+        action: "login",
+        student_id: document.getElementById('sid').value,
+        password: document.getElementById('bday').value
+      };
+
+      try {
+        const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
+        const result = await res.json();
+        if (result.success) {
+          user = { id: data.student_id, name: result.name, hours: result.hours };
+          document.getElementById('login-screen').classList.add('hidden');
+          document.getElementById('app-screen').classList.remove('hidden');
+          document.getElementById('user-name').innerText = user.name;
+          document.getElementById('user-id').innerText = "รหัส: " + user.id;
+          document.getElementById('display-hours').innerText = user.hours;
+        } else { alert(result.message); }
+      } catch (err) { alert("กรุณาตรวจสอบ URL Script หรือการเชื่อมต่อ"); }
+      btn.disabled = false; btn.innerText = "เข้าสู่ระบบ";
+    };
+
+    // ระบบสลับเมนู
+    function tab(name) {
+      document.getElementById('menu-checkin').classList.add('hidden');
+      document.getElementById('menu-stats').classList.add('hidden');
+      document.getElementById('nav-checkin').classList.remove('nav-active', 'text-gray-400');
+      document.getElementById('nav-stats').classList.remove('nav-active', 'text-gray-400');
+      
+      document.getElementById('menu-' + name).classList.remove('hidden');
+      document.getElementById('nav-' + name).classList.add('nav-active');
+      const other = name === 'checkin' ? 'stats' : 'checkin';
+      document.getElementById('nav-' + other).classList.add('text-gray-400');
+    }
+
+    // ระบบบันทึกพิกัด
+    document.getElementById('btn-save').onclick = async () => {
+      if (!document.getElementById('location').value) return alert("เลือกสถานที่ก่อนครับ");
+      const btn = document.getElementById('btn-save');
+      btn.disabled = true; btn.innerText = "กำลังบันทึก...";
+
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const payload = {
+          action: "checkin",
+          student_id: user.id,
+          student_name: user.name,
+          check_type: document.querySelector('input[name="ctype"]:checked').value,
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          status: "บันทึกสำเร็จ"
+        };
+        await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+        alert("บันทึกข้อมูลเรียบร้อย!");
+        btn.disabled = false; btn.innerText = "✅ บันทึกกิจกรรม";
+      }, () => { alert("กรุณาเปิด GPS"); btn.disabled = false; });
+    };
+  </script>
+</body>
+</html>
