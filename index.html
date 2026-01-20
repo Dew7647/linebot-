@@ -1,248 +1,171 @@
 <!doctype html>
-<html lang="th" class="h-full">
- <head>
+<html lang="th">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบเช็คชื่อกิจกรรม (PSRU)</title>
+  <title>ระบบเช็คชื่อ QR Code</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { box-sizing: border-box; font-family: 'Sarabun', sans-serif; }
-    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .card-shadow { box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-    .slide-up { animation: slideUp 0.3s ease-out; }
-    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .toast { animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100; }
-    @keyframes toastIn { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
-    @keyframes toastOut { from { transform: translate(-50%, 0); opacity: 1; } to { transform: translate(-50%, -100%); opacity: 0; } }
+    body { font-family: 'Sarabun', sans-serif; }
+    .hidden { display: none; }
+    #reader { border-radius: 1rem; overflow: hidden; border: none !important; }
+    .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; }
   </style>
- </head>
- <body class="h-full">
-  <div id="app" class="h-full w-full overflow-auto gradient-bg">
-   <div id="toast-container"></div>
-   
-   <header class="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-40">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div>
-        <h1 id="app-title" class="text-2xl font-bold text-white">ระบบเช็คชื่อกิจกรรม</h1>
-        <p id="organization" class="text-white/70 text-sm">มหาวิทยาลัยราชภัฏพิบูลสงคราม</p>
-      </div>
-      <div id="location-status" class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-200">
-         📍 กำลังตรวจสอบพิกัด...
-      </div>
-    </div>
-   </header>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
 
-   <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
-    <div class="bg-white rounded-2xl card-shadow p-6 slide-up">
-     <div class="flex items-center gap-4 mb-6">
-      <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center text-2xl">📋</div>
-      <div class="flex-1">
-        <h2 id="activity-name" class="text-xl font-bold text-gray-800">กิจกรรมเช็คชื่อเข้าเรียน/ร่วมกิจกรรม</h2>
-        <p class="text-gray-500 text-sm" id="current-datetime"></p>
-      </div>
-     </div>
-
-     <div class="bg-gray-50 rounded-xl p-4 space-y-3">
-      <h3 class="font-semibold text-gray-700 flex items-center gap-2"><span>📍</span> เลือกสถานที่จัดกิจกรรม</h3>
-      <select id="location-select" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500">
-        <option value="">-- กรุณาเลือกสถานที่ --</option>
-        <option value="custom">🔍 ดึงพิกัดจากตำแหน่งปัจจุบันของฉัน</option>
-        <option value="16.820250,100.225500,100">🏛️ หอประชุมวชิรโชติ (100m)</option>
-        <option value="16.819300,100.227200,150">🏟️ สนามกีฬาพระองค์ดำ (150m)</option>
-      </select>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-       <input type="number" id="target-lat" placeholder="ละติจูด" readonly class="px-3 py-2 border rounded-lg text-sm bg-gray-100">
-       <input type="number" id="target-lng" placeholder="ลองจิจูด" readonly class="px-3 py-2 border rounded-lg text-sm bg-gray-100">
-       <input type="number" id="allowed-radius" placeholder="รัศมี (เมตร)" readonly class="px-3 py-2 border rounded-lg text-sm bg-gray-100">
-      </div>
-     </div>
+  <div id="auth-screen" class="flex-1 flex flex-col items-center justify-center p-6 bg-indigo-600">
+    <div id="login-form" class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center">
+      <h2 class="text-2xl font-bold mb-6 text-gray-800">เข้าสู่ระบบ</h2>
+      <input type="text" id="sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-xl outline-none">
+      <input type="password" id="pass" placeholder="วันเกิด (ววดดปปปป)" class="w-full p-4 mb-4 border rounded-xl outline-none">
+      <button onclick="handleLogin()" id="btn-login" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold">เข้าสู่ระบบ</button>
+      <button onclick="toggleAuth(true)" class="text-sm text-gray-400 mt-4 underline">ลงทะเบียนใหม่</button>
     </div>
 
-    <div class="bg-white rounded-2xl card-shadow p-6 slide-up">
-     <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><span>✍️</span> บันทึกข้อมูลนักศึกษา</h3>
-     <form id="checkin-form" class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-       <input type="text" id="student-id" required placeholder="รหัสนักศึกษา (เช่น 012345)" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500">
-       <input type="text" id="student-name" required placeholder="ชื่อ-นามสกุล" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500">
-      </div>
-      <div class="flex gap-3">
-        <label class="flex-1 cursor-pointer">
-          <input type="radio" name="check-type" value="เข้า" checked class="sr-only peer">
-          <div class="py-3 text-center border-2 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:text-green-700">🟢 เช็คเข้า</div>
-        </label>
-        <label class="flex-1 cursor-pointer">
-          <input type="radio" name="check-type" value="ออก" class="sr-only peer">
-          <div class="py-3 text-center border-2 rounded-xl peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700">🔴 เช็คออก</div>
-        </label>
-      </div>
-      <button type="submit" id="submit-btn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg hover:opacity-90 transition-all">
-        ✅ ส่งข้อมูลไปที่ Google Sheet
-      </button>
-     </form>
+    <div id="reg-form" class="hidden bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center">
+      <h2 class="text-2xl font-bold mb-6 text-emerald-600">ลงทะเบียน</h2>
+      <input type="text" id="r-sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-xl">
+      <input type="text" id="r-name" placeholder="ชื่อ-นามสกุล" class="w-full p-4 mb-4 border rounded-xl">
+      <input type="password" id="r-pass" placeholder="วันเกิด (14052545)" class="w-full p-4 mb-6 border rounded-xl">
+      <button onclick="handleRegister()" id="btn-reg" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold">ยืนยันลงทะเบียน</button>
+      <button onclick="toggleAuth(false)" class="text-sm text-gray-400 mt-4 underline">กลับไปหน้า Login</button>
     </div>
+  </div>
 
-    <div class="bg-white rounded-2xl card-shadow p-6 slide-up overflow-hidden">
-     <h3 class="font-bold text-gray-800 mb-4">📊 ประวัติการส่งข้อมูล</h3>
-     <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left">
-       <thead>
-        <tr class="bg-gray-50 border-b">
-         <th class="px-4 py-3">รหัส</th>
-         <th class="px-4 py-3">ชื่อ</th>
-         <th class="px-4 py-3">ประเภท</th>
-         <th class="px-4 py-3">สถานะ</th>
-         <th class="px-4 py-3">ระยะทาง</th>
-        </tr>
-       </thead>
-       <tbody id="records-body" class="divide-y">
-        <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">ยังไม่มีการบันทึก</td></tr>
-       </tbody>
-      </table>
-     </div>
-    </div>
-   </main>
+  <div id="app-screen" class="hidden flex-1 flex flex-col">
+    <header class="bg-white p-5 border-b flex justify-between items-center shadow-sm">
+      <h1 class="font-bold text-indigo-600">QR CHECK-IN</h1>
+      <button onclick="location.reload()" class="text-xs text-red-500 font-bold">Log out</button>
+    </header>
+
+    <main class="flex-1 p-6 overflow-y-auto">
+      <section id="tab-list">
+        <h3 class="font-bold text-gray-700 mb-4">📍 สถานที่จัดงาน</h3>
+        <div class="space-y-3">
+          <div class="p-4 bg-white rounded-2xl border-l-4 border-indigo-500 shadow-sm text-sm">หอประชุมวชิรโชติ</div>
+          <div class="p-4 bg-white rounded-2xl border-l-4 border-blue-500 shadow-sm text-sm">สนามกีฬาพระองค์ดำ</div>
+          <div class="p-4 bg-white rounded-2xl border-l-4 border-amber-500 shadow-sm text-sm">ศาลเจ้าพ่อทะเลแก้ว</div>
+          <div class="p-4 bg-white rounded-2xl border-l-4 border-emerald-500 shadow-sm text-sm">ตึกพิบูลวิชญ์</div>
+        </div>
+      </section>
+
+      <section id="tab-check" class="hidden">
+        <div class="bg-white p-6 rounded-3xl shadow-sm text-center">
+          <h3 class="font-bold text-gray-700 mb-4 text-lg">สแกน QR Code เพื่อเช็คชื่อ</h3>
+          <div id="reader" class="mb-4 bg-slate-100 min-h-[250px]"></div>
+          <div id="scanned-result" class="hidden p-4 bg-indigo-50 text-indigo-700 rounded-xl mb-4 font-bold"></div>
+          
+          <div class="flex gap-4 mb-6">
+            <label class="flex-1 p-4 border rounded-xl cursor-pointer has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500">
+              <input name="ctype" type="radio" value="เข้า" checked class="hidden"> เช็คเข้า
+            </label>
+            <label class="flex-1 p-4 border rounded-xl cursor-pointer has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500">
+              <input name="ctype" type="radio" value="ออก" class="hidden"> เช็คออก
+            </label>
+          </div>
+          <button id="btn-scan" onclick="startScanner()" class="w-full py-4 bg-slate-800 text-white rounded-xl font-bold mb-2">เปิดกล้อง</button>
+          <button id="btn-save" onclick="handleCheckin()" class="hidden w-full py-5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg">บันทึกพิกัดและเช็คชื่อ</button>
+        </div>
+      </section>
+
+      <section id="tab-user" class="hidden flex flex-col items-center">
+        <div class="relative w-32 h-32 mb-6">
+          <img id="u-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-full h-full rounded-full object-cover border-4 border-white shadow-lg">
+          <label class="absolute bottom-0 right-0 bg-indigo-600 p-2 rounded-full cursor-pointer">
+            <input type="file" class="hidden" accept="image/*" onchange="uploadPhoto(this)">📷
+          </label>
+        </div>
+        <div class="bg-white p-8 rounded-3xl w-full text-center shadow-sm">
+          <p class="text-xs text-gray-400">ชั่วโมงสะสม</p>
+          <h2 id="u-hours" class="text-6xl font-black text-indigo-600 my-2">0</h2>
+          <p id="u-name" class="font-bold text-lg text-gray-800"></p>
+          <p id="u-id" class="text-xs text-gray-400"></p>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bg-white border-t flex justify-around py-4">
+      <button onclick="showTab('list')" id="n-list" class="flex-1 text-center nav-active">🏠<br><span class="text-[10px]">หน้าหลัก</span></button>
+      <button onclick="showTab('check')" id="n-check" class="flex-1 text-center text-gray-400">📸<br><span class="text-[10px]">เช็คชื่อ</span></button>
+      <button onclick="showTab('user')" id="n-user" class="flex-1 text-center text-gray-400">👤<br><span class="text-[10px]">โปรไฟล์</span></button>
+    </nav>
   </div>
 
   <script>
-    // --- 1. CONFIGURATION ---
-    // *** สำคัญ: วาง URL เว็บแอปที่ได้จาก Google Apps Script ของคุณที่นี่ ***
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9-dzmqbAAdou8FNoKI_ChnIRHSmLBu9a0xVjrTIKvGCelZkWxsvHL0tWv9sMaqf_v/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIiiMNO8LCR2ZKrnymFRMYo5-ieCWeSDAW_aKXTmqYVhkdEziL4UyuwUgpRoLgBZe4/exec";
+    let currentUser = null, html5QrCode, scannedActivity = "";
 
-    let currentLocation = null;
-    let localRecords = [];
-
-    function showToast(msg, type = 'success') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white px-8 py-4 rounded-2xl shadow-2xl font-bold`;
-      toast.textContent = msg;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+    function toggleAuth(reg) {
+      document.getElementById('login-form').classList.toggle('hidden', reg);
+      document.getElementById('reg-form').classList.toggle('hidden', !reg);
     }
 
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371e3;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2;
-      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    function showTab(name) {
+      ['list', 'check', 'user'].forEach(t => {
+        document.getElementById('tab-'+t).classList.toggle('hidden', t !== name);
+        document.getElementById('n-'+t).classList.toggle('nav-active', t === name);
+      });
+      if(name !== 'check' && html5QrCode) html5QrCode.stop().catch(()=>{});
     }
 
-    async function getCurrentLocation() {
-      const statusBox = document.getElementById('location-status');
-      if (!navigator.geolocation) return null;
-      return new Promise((resolve) => {
-        navigator.geolocation.getCurrentPosition(
-          (p) => {
-            currentLocation = { lat: p.coords.latitude, lng: p.coords.longitude };
-            statusBox.className = 'px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-200';
-            statusBox.textContent = '📍 พิกัดพร้อม';
-            resolve(currentLocation);
-          },
-          () => {
-            statusBox.className = 'px-3 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-200';
-            statusBox.textContent = '📍 ปิด GPS';
-            resolve(null);
-          }
-        );
+    async function handleLogin() {
+      const btn = document.getElementById('btn-login'); btn.innerText = "กำลังเข้าสู่ระบบ...";
+      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "login", student_id: document.getElementById('sid').value, password: document.getElementById('pass').value })});
+      const r = await res.json();
+      if(r.success) {
+        currentUser = { id: document.getElementById('sid').value, name: r.name };
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+        document.getElementById('u-name').innerText = r.name;
+        document.getElementById('u-id').innerText = "ID: " + currentUser.id;
+        document.getElementById('u-hours').innerText = r.hours;
+        if(r.photoUrl) document.getElementById('u-img').src = r.photoUrl;
+        showTab('list');
+      } else { alert(r.message); btn.innerText = "เข้าสู่ระบบ"; }
+    }
+
+    async function handleRegister() {
+      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "register", student_id: document.getElementById('r-sid').value, student_name: document.getElementById('r-name').value, password: document.getElementById('r-pass').value })});
+      const r = await res.json();
+      if(r.success) { alert("สำเร็จ! เข้าระบบได้เลย"); toggleAuth(false); }
+    }
+
+    function startScanner() {
+      html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+        scannedActivity = text;
+        document.getElementById('scanned-result').innerText = "พบกิจกรรม: " + text;
+        document.getElementById('scanned-result').classList.remove('hidden');
+        document.getElementById('btn-save').classList.remove('hidden');
+        html5QrCode.stop();
       });
     }
 
-    async function handleLocationSelect(e) {
-      const val = e.target.value;
-      if (val === 'custom') {
-        const loc = await getCurrentLocation();
-        if (loc) {
-          document.getElementById('target-lat').value = loc.lat.toFixed(6);
-          document.getElementById('target-lng').value = loc.lng.toFixed(6);
-          document.getElementById('allowed-radius').value = 50;
-          showToast("ใช้ตำแหน่งปัจจุบันเป็นจุดเช็คชื่อ");
-        }
-      } else if (val !== "") {
-        const [lat, lng, rad] = val.split(',');
-        document.getElementById('target-lat').value = lat;
-        document.getElementById('target-lng').value = lng;
-        document.getElementById('allowed-radius').value = rad;
-      }
+    async function handleCheckin() {
+      const btn = document.getElementById('btn-save'); btn.innerText = "กำลังส่งพิกัด...";
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
+          action: "checkin", student_id: currentUser.id, student_name: currentUser.name,
+          activity_name: scannedActivity, check_type: document.querySelector('input[name="ctype"]:checked').value,
+          latitude: pos.coords.latitude, longitude: pos.coords.longitude
+        })});
+        alert("เช็คชื่อสำเร็จ!");
+        location.reload();
+      }, () => alert("กรุณาเปิด GPS"), { enableHighAccuracy: true });
     }
 
-    document.getElementById('checkin-form').onsubmit = async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('submit-btn');
-      
-      const tLat = parseFloat(document.getElementById('target-lat').value);
-      if(isNaN(tLat)) {
-          showToast("กรุณาเลือกสถานที่ก่อนเช็คชื่อ", "error");
-          return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = "⏳ กำลังบันทึกข้อมูล...";
-
-      const studentId = document.getElementById('student-id').value;
-      const studentName = document.getElementById('student-name').value;
-      const type = document.querySelector('input[name="check-type"]:checked').value;
-      const activity = document.getElementById('activity-name').textContent;
-
-      const loc = await getCurrentLocation();
-      const tLng = parseFloat(document.getElementById('target-lng').value);
-      const rad = parseFloat(document.getElementById('allowed-radius').value) || 100;
-
-      let distance = loc ? calculateDistance(loc.lat, loc.lng, tLat, tLng) : null;
-      let status = distance === null ? "ไม่ระบุพิกัด" : (distance <= rad ? "อยู่ในพื้นที่" : "นอกพื้นที่");
-
-      const payload = {
-        student_id: studentId,
-        student_name: studentName,
-        activity_name: activity,
-        check_type: type,
-        latitude: loc ? loc.lat : "",
-        longitude: loc ? loc.lng : "",
-        distance: distance ? distance.toFixed(2) : "",
-        status: status
+    async function uploadPhoto(input) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "uploadPhoto", student_id: currentUser.id, image: e.target.result.split(',')[1], mimeType: input.files[0].type })});
+        const r = await res.json();
+        if(r.success) document.getElementById('u-img').src = r.photoUrl;
       };
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          cache: 'no-cache',
-          body: JSON.stringify(payload)
-        });
-
-        showToast(`บันทึกสำเร็จ!`);
-        localRecords.unshift(payload);
-        updateTable();
-        document.getElementById('student-id').value = "";
-        document.getElementById('student-name').value = "";
-      } catch (err) {
-        showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "✅ ส่งข้อมูลไปที่ Google Sheet";
-      }
-    };
-
-    function updateTable() {
-      const tbody = document.getElementById('records-body');
-      tbody.innerHTML = localRecords.map(r => `
-        <tr class="hover:bg-gray-50">
-          <td class="px-4 py-3 font-bold">${r.student_id}</td>
-          <td class="px-4 py-3">${r.student_name}</td>
-          <td class="px-4 py-3 text-${r.check_type === 'เข้า' ? 'green' : 'red'}-600 font-medium">${r.check_type}</td>
-          <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${r.status === 'อยู่ในพื้นที่' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${r.status}</span></td>
-          <td class="px-4 py-3 text-gray-500">${r.distance || '-'} ม.</td>
-        </tr>
-      `).join('');
+      reader.readAsDataURL(input.files[0]);
     }
-
-    setInterval(() => {
-      document.getElementById('current-datetime').textContent = new Date().toLocaleString('th-TH');
-    }, 1000);
-    document.getElementById('location-select').onchange = handleLocationSelect;
-    getCurrentLocation();
   </script>
- </body>
+</body>
 </html>
