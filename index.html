@@ -3,117 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบเช็คชื่อ QR Code</title>
+  <title>ระบบกิจกรรมนักศึกษา</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Sarabun', sans-serif; }
     .hidden { display: none; }
-    #reader { border-radius: 1rem; overflow: hidden; border: none !important; }
     .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; }
+    #reader { border-radius: 1.5rem; overflow: hidden; border: none !important; }
   </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
 
   <div id="auth-screen" class="flex-1 flex flex-col items-center justify-center p-6 bg-indigo-600">
-    <div id="login-form" class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center">
-      <h2 class="text-2xl font-bold mb-6 text-gray-800">เข้าสู่ระบบ</h2>
-      <input type="text" id="sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-xl outline-none">
-      <input type="password" id="pass" placeholder="วันเกิด (ววดดปปปป)" class="w-full p-4 mb-4 border rounded-xl outline-none">
-      <button onclick="handleLogin()" id="btn-login" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold">เข้าสู่ระบบ</button>
-      <button onclick="toggleAuth(true)" class="text-sm text-gray-400 mt-4 underline">ลงทะเบียนใหม่</button>
+    <div id="login-form" class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm">
+      <h2 class="text-2xl font-bold text-center mb-6">เข้าสู่ระบบ</h2>
+      <input type="text" id="sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-2xl outline-none">
+      <input type="password" id="pass" placeholder="วันเกิด (ววดดปปปป)" class="w-full p-4 mb-6 border rounded-2xl outline-none">
+      <button onclick="handleLogin()" id="btn-login" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg">Login</button>
+      <button onclick="toggleAuth(true)" class="w-full text-center text-sm text-gray-400 mt-4 underline">ลงทะเบียนครั้งแรก</button>
     </div>
 
-    <div id="reg-form" class="hidden bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center">
-      <h2 class="text-2xl font-bold mb-6 text-emerald-600">ลงทะเบียน</h2>
-      <input type="text" id="r-sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-xl">
-      <input type="text" id="r-name" placeholder="ชื่อ-นามสกุล" class="w-full p-4 mb-4 border rounded-xl">
-      <input type="password" id="r-pass" placeholder="วันเกิด (14052545)" class="w-full p-4 mb-6 border rounded-xl">
-      <button onclick="handleRegister()" id="btn-reg" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold">ยืนยันลงทะเบียน</button>
-      <button onclick="toggleAuth(false)" class="text-sm text-gray-400 mt-4 underline">กลับไปหน้า Login</button>
+    <div id="reg-form" class="hidden bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm">
+      <h2 class="text-2xl font-bold text-center text-emerald-600 mb-6">ลงทะเบียน</h2>
+      <input type="text" id="r-sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-2xl">
+      <input type="text" id="r-name" placeholder="ชื่อ-นามสกุล" class="w-full p-4 mb-4 border rounded-2xl">
+      <input type="password" id="r-pass" placeholder="วันเกิด (เช่น 14052545)" class="w-full p-4 mb-6 border rounded-2xl">
+      <button onclick="handleRegister()" id="btn-reg" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg">ยืนยัน</button>
+      <button onclick="toggleAuth(false)" class="w-full text-center text-sm text-gray-400 mt-4 underline">กลับไปหน้า Login</button>
     </div>
   </div>
 
   <div id="app-screen" class="hidden flex-1 flex flex-col">
     <header class="bg-white p-5 border-b flex justify-between items-center shadow-sm">
-      <h1 class="font-bold text-indigo-600">QR CHECK-IN</h1>
-      <button onclick="location.reload()" class="text-xs text-red-500 font-bold">Log out</button>
+      <span class="font-bold text-indigo-600">ACTIVITY APP</span>
+      <button onclick="location.reload()" class="text-xs font-bold text-red-500">Log out</button>
     </header>
 
     <main class="flex-1 p-6 overflow-y-auto">
-      <section id="tab-list">
-        <h3 class="font-bold text-gray-700 mb-4">📍 สถานที่จัดงาน</h3>
-        <div class="space-y-3">
-          <div class="p-4 bg-white rounded-2xl border-l-4 border-indigo-500 shadow-sm text-sm">หอประชุมวชิรโชติ</div>
-          <div class="p-4 bg-white rounded-2xl border-l-4 border-blue-500 shadow-sm text-sm">สนามกีฬาพระองค์ดำ</div>
-          <div class="p-4 bg-white rounded-2xl border-l-4 border-amber-500 shadow-sm text-sm">ศาลเจ้าพ่อทะเลแก้ว</div>
-          <div class="p-4 bg-white rounded-2xl border-l-4 border-emerald-500 shadow-sm text-sm">ตึกพิบูลวิชญ์</div>
+      <section id="tab-list" class="space-y-4">
+        <h3 class="font-bold text-gray-700">📅 กิจกรรมที่เปิดรับขณะนี้</h3>
+        <div id="activity-container" class="space-y-3">
+          <p class="text-center text-gray-400 py-10 animate-pulse text-xs">กำลังโหลดข้อมูล...</p>
         </div>
       </section>
 
-      <section id="tab-check" class="hidden">
-        <div class="bg-white p-6 rounded-3xl shadow-sm text-center">
-          <h3 class="font-bold text-gray-700 mb-4 text-lg">สแกน QR Code เพื่อเช็คชื่อ</h3>
-          <div id="reader" class="mb-4 bg-slate-100 min-h-[250px]"></div>
-          <div id="scanned-result" class="hidden p-4 bg-indigo-50 text-indigo-700 rounded-xl mb-4 font-bold"></div>
-          
-          <div class="flex gap-4 mb-6">
-            <label class="flex-1 p-4 border rounded-xl cursor-pointer has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500">
-              <input name="ctype" type="radio" value="เข้า" checked class="hidden"> เช็คเข้า
+      <section id="tab-check" class="hidden space-y-4 text-center">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border">
+          <h3 class="font-bold text-gray-700 mb-4">สแกน QR Code เพื่อเช็คชื่อ</h3>
+          <div id="reader" class="mb-4 bg-black min-h-[250px]"></div>
+          <div id="scanned-result" class="hidden p-4 bg-indigo-50 text-indigo-700 rounded-2xl mb-4 font-bold border border-indigo-100 italic"></div>
+          <div class="flex gap-4 mb-6 text-sm">
+            <label class="flex-1 p-4 border rounded-2xl cursor-pointer has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500">
+              <input name="ctype" type="radio" value="เข้า" checked class="hidden"> เข้างาน
             </label>
-            <label class="flex-1 p-4 border rounded-xl cursor-pointer has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500">
-              <input name="ctype" type="radio" value="ออก" class="hidden"> เช็คออก
+            <label class="flex-1 p-4 border rounded-2xl cursor-pointer has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500">
+              <input name="ctype" type="radio" value="ออก" class="hidden"> ออกงาน
             </label>
           </div>
-          <button id="btn-scan" onclick="startScanner()" class="w-full py-4 bg-slate-800 text-white rounded-xl font-bold mb-2">เปิดกล้อง</button>
-          <button id="btn-save" onclick="handleCheckin()" class="hidden w-full py-5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg">บันทึกพิกัดและเช็คชื่อ</button>
+          <button id="btn-scan" onclick="startScanner()" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold mb-2">เปิดกล้อง</button>
+          <button id="btn-save" onclick="handleCheckin()" class="hidden w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold shadow-xl">บันทึกข้อมูลและพิกัด</button>
         </div>
       </section>
 
       <section id="tab-user" class="hidden flex flex-col items-center">
-        <div class="relative w-32 h-32 mb-6">
-          <img id="u-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-full h-full rounded-full object-cover border-4 border-white shadow-lg">
-          <label class="absolute bottom-0 right-0 bg-indigo-600 p-2 rounded-full cursor-pointer">
-            <input type="file" class="hidden" accept="image/*" onchange="uploadPhoto(this)">📷
+        <div class="relative mb-6">
+          <div class="w-36 h-36 rounded-full border-4 border-white shadow-xl overflow-hidden bg-slate-200">
+            <img id="u-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-full h-full object-cover">
+          </div>
+          <label class="absolute bottom-1 right-1 bg-indigo-600 p-2.5 rounded-full shadow-lg cursor-pointer">
+            <input type="file" id="photo-input" class="hidden" accept="image/*" onchange="uploadPhoto(this)">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
           </label>
         </div>
-        <div class="bg-white p-8 rounded-3xl w-full text-center shadow-sm">
-          <p class="text-xs text-gray-400">ชั่วโมงสะสม</p>
-          <h2 id="u-hours" class="text-6xl font-black text-indigo-600 my-2">0</h2>
-          <p id="u-name" class="font-bold text-lg text-gray-800"></p>
-          <p id="u-id" class="text-xs text-gray-400"></p>
+        <div class="bg-gradient-to-br from-indigo-600 to-purple-700 text-white p-8 rounded-[2.5rem] w-full text-center shadow-2xl">
+          <p class="text-indigo-200 text-xs mb-1">ชั่วโมงสะสม</p>
+          <h2 id="u-hours" class="text-7xl font-black mb-4">0</h2>
+          <p id="u-name" class="font-bold text-xl"></p>
+          <p id="u-id" class="text-xs opacity-50 mt-1"></p>
         </div>
       </section>
     </main>
 
-    <nav class="bg-white border-t flex justify-around py-4">
-      <button onclick="showTab('list')" id="n-list" class="flex-1 text-center nav-active">🏠<br><span class="text-[10px]">หน้าหลัก</span></button>
-      <button onclick="showTab('check')" id="n-check" class="flex-1 text-center text-gray-400">📸<br><span class="text-[10px]">เช็คชื่อ</span></button>
-      <button onclick="showTab('user')" id="n-user" class="flex-1 text-center text-gray-400">👤<br><span class="text-[10px]">โปรไฟล์</span></button>
+    <nav class="bg-white border-t flex justify-around py-4 pb-8 shadow-inner">
+      <button onclick="showTab('list')" id="n-list" class="flex-1 text-center nav-active">📅<br><span class="text-[10px] font-bold">กิจกรรม</span></button>
+      <button onclick="showTab('check')" id="n-check" class="flex-1 text-center text-slate-400">📸<br><span class="text-[10px] font-bold">เช็คชื่อ</span></button>
+      <button onclick="showTab('user')" id="n-user" class="flex-1 text-center text-slate-400">👤<br><span class="text-[10px] font-bold">บัญชี</span></button>
     </nav>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIiiMNO8LCR2ZKrnymFRMYo5-ieCWeSDAW_aKXTmqYVhkdEziL4UyuwUgpRoLgBZe4/exec";
-    let currentUser = null, html5QrCode, scannedActivity = "";
-
-    function toggleAuth(reg) {
-      document.getElementById('login-form').classList.toggle('hidden', reg);
-      document.getElementById('reg-form').classList.toggle('hidden', !reg);
-    }
+    const SCRIPT_URL = "วาง_URL_APPS_SCRIPT_ที่นี่";
+    let currentUser = null, html5QrCode = null, scannedActivity = "";
 
     function showTab(name) {
       ['list', 'check', 'user'].forEach(t => {
         document.getElementById('tab-'+t).classList.toggle('hidden', t !== name);
         document.getElementById('n-'+t).classList.toggle('nav-active', t === name);
       });
-      if(name !== 'check' && html5QrCode) html5QrCode.stop().catch(()=>{});
+      if(name !== 'check' && html5QrCode) { html5QrCode.stop().catch(()=>{}); }
+      if(name === 'list') loadActivities();
+    }
+
+    function toggleAuth(reg) {
+      document.getElementById('login-form').classList.toggle('hidden', reg);
+      document.getElementById('reg-form').classList.toggle('hidden', !reg);
     }
 
     async function handleLogin() {
-      const btn = document.getElementById('btn-login'); btn.innerText = "กำลังเข้าสู่ระบบ...";
-      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "login", student_id: document.getElementById('sid').value, password: document.getElementById('pass').value })});
+      const btn = document.getElementById('btn-login'); btn.innerText = "กำลังตรวจสอบ...";
+      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({
+        action: "login", student_id: document.getElementById('sid').value, password: document.getElementById('pass').value
+      })});
       const r = await res.json();
       if(r.success) {
         currentUser = { id: document.getElementById('sid').value, name: r.name };
@@ -124,24 +126,32 @@
         document.getElementById('u-hours').innerText = r.hours;
         if(r.photoUrl) document.getElementById('u-img').src = r.photoUrl;
         showTab('list');
-      } else { alert(r.message); btn.innerText = "เข้าสู่ระบบ"; }
+      } else { alert(r.message); btn.innerText = "Login"; }
     }
 
-    async function handleRegister() {
-      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "register", student_id: document.getElementById('r-sid').value, student_name: document.getElementById('r-name').value, password: document.getElementById('r-pass').value })});
-      const r = await res.json();
-      if(r.success) { alert("สำเร็จ! เข้าระบบได้เลย"); toggleAuth(false); }
+    async function loadActivities() {
+      const container = document.getElementById('activity-container');
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const list = await res.json();
+        container.innerHTML = list.map(item => `
+          <div class="p-4 bg-white rounded-2xl border-l-4 border-indigo-500 shadow-sm flex justify-between items-center">
+            <span class="text-sm font-bold text-gray-700">${item}</span>
+            <span class="text-[9px] bg-green-100 text-green-600 px-2 py-1 rounded-full uppercase">Open</span>
+          </div>
+        `).join('') || "<p class='text-center text-xs text-gray-400 py-10'>ยังไม่มีกิจกรรมใหม่</p>";
+      } catch (e) { container.innerHTML = "โหลดไม่สำเร็จ"; }
     }
 
     function startScanner() {
       html5QrCode = new Html5Qrcode("reader");
       html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
         scannedActivity = text;
-        document.getElementById('scanned-result').innerText = "พบกิจกรรม: " + text;
+        document.getElementById('scanned-result').innerText = "กิจกรรม: " + text;
         document.getElementById('scanned-result').classList.remove('hidden');
         document.getElementById('btn-save').classList.remove('hidden');
         html5QrCode.stop();
-      });
+      }).catch(err => alert("เปิดกล้องไม่ได้"));
     }
 
     async function handleCheckin() {
@@ -152,17 +162,23 @@
           activity_name: scannedActivity, check_type: document.querySelector('input[name="ctype"]:checked').value,
           latitude: pos.coords.latitude, longitude: pos.coords.longitude
         })});
-        alert("เช็คชื่อสำเร็จ!");
-        location.reload();
+        alert("บันทึกสำเร็จ!");
+        showTab('list');
       }, () => alert("กรุณาเปิด GPS"), { enableHighAccuracy: true });
     }
 
     async function uploadPhoto(input) {
+      if (!input.files[0]) return;
       const reader = new FileReader();
+      document.getElementById('u-img').style.opacity = "0.3";
       reader.onload = async (e) => {
-        const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "uploadPhoto", student_id: currentUser.id, image: e.target.result.split(',')[1], mimeType: input.files[0].type })});
+        const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({
+          action: "uploadPhoto", student_id: currentUser.id,
+          image: e.target.result.split(',')[1], mimeType: input.files[0].type
+        })});
         const r = await res.json();
-        if(r.success) document.getElementById('u-img').src = r.photoUrl;
+        if(r.success) document.getElementById('u-img').src = r.photoUrl + "&t=" + new Date().getTime();
+        document.getElementById('u-img').style.opacity = "1";
       };
       reader.readAsDataURL(input.files[0]);
     }
