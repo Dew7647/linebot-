@@ -3,112 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบกิจกรรมนักศึกษา v3</title>
+  <title>ระบบเช็คชื่อ v4</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Sarabun', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Sarabun', sans-serif; }
     .hidden { display: none !important; }
-    .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; background: #f8fafc; }
-    #reader { border-radius: 1.5rem; overflow: hidden; border: 2px solid #e2e8f0 !important; }
-    button:active { transform: scale(0.98); }
+    .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; }
   </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
 
   <div id="auth-screen" class="flex-1 flex flex-col items-center justify-center p-6 bg-indigo-600">
-    <div id="login-form" class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm">
-      <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">เข้าสู่ระบบ</h2>
-      <div class="space-y-4">
-        <input type="text" id="sid" placeholder="รหัสนักศึกษา" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-400">
-        <input type="password" id="pass" placeholder="วันเกิด (ววดดปปปป)" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-400">
-        <button onclick="handleLogin()" id="btn-login" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition">เข้าสู่ระบบ</button>
-        <button onclick="toggleAuth(true)" class="w-full text-center text-sm text-gray-400 mt-2 underline">ยังไม่มีบัญชี? ลงทะเบียน</button>
-      </div>
+    <div id="login-form" class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm">
+      <h2 class="text-2xl font-bold text-center mb-6">เข้าสู่ระบบ</h2>
+      <input type="text" id="sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-xl outline-none">
+      <input type="password" id="pass" placeholder="วันเกิด (ววดดปปปป)" class="w-full p-4 mb-6 border rounded-xl outline-none">
+      <button onclick="handleLogin()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold">Login</button>
+      <button onclick="toggleAuth(true)" class="w-full text-center text-sm text-gray-400 mt-4 underline">ลงทะเบียนใหม่</button>
     </div>
 
-    <div id="reg-form" class="hidden bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm">
-      <h2 class="text-2xl font-bold text-center text-emerald-600 mb-6">ลงทะเบียนนักศึกษา</h2>
-      <div class="space-y-4">
-        <input type="text" id="r-sid" placeholder="รหัสนักศึกษา" class="w-full p-4 border rounded-2xl">
-        <input type="text" id="r-name" placeholder="ชื่อ-นามสกุล" class="w-full p-4 border rounded-2xl">
-        <input type="password" id="r-pass" placeholder="วันเกิด (เช่น 14052545)" class="w-full p-4 border rounded-2xl">
-        <button onclick="handleRegister()" id="btn-reg" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg">ยืนยันข้อมูล</button>
-        <button onclick="toggleAuth(false)" class="w-full text-center text-sm text-gray-400 mt-2 underline">มีบัญชีแล้ว? กลับไป Login</button>
-      </div>
+    <div id="reg-form" class="hidden bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm">
+      <h2 class="text-2xl font-bold text-center text-emerald-600 mb-6">ลงทะเบียน</h2>
+      <input type="text" id="r-sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-xl">
+      <input type="text" id="r-name" placeholder="ชื่อ-นามสกุล" class="w-full p-4 mb-4 border rounded-xl">
+      <input type="password" id="r-pass" placeholder="วันเกิด" class="w-full p-4 mb-6 border rounded-xl">
+      <button onclick="handleRegister()" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold text-lg">ลงทะเบียน</button>
+      <button onclick="toggleAuth(false)" class="w-full text-center text-sm text-gray-400 mt-4 underline">กลับไป Login</button>
     </div>
   </div>
 
-  <div id="app-screen" class="hidden flex-1 flex flex-col overflow-hidden">
+  <div id="app-screen" class="hidden flex-1 flex flex-col">
     <header class="bg-white p-5 border-b flex justify-between items-center shadow-sm">
-      <span class="font-bold text-indigo-600 tracking-wider">STUDENT APP</span>
-      <button onclick="location.reload()" class="text-[10px] font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full border border-red-100">LOGOUT</button>
+      <span class="font-bold text-indigo-600 uppercase">System Active</span>
+      <button onclick="location.reload()" class="text-xs font-bold text-red-500">Log out</button>
     </header>
 
-    <main class="flex-1 p-6 overflow-y-auto pb-24">
-      <section id="tab-list" class="space-y-4">
-        <h3 class="font-bold text-gray-700 flex items-center gap-2">
-           📅 รายการกิจกรรม/สถานที่
-        </h3>
-        <div id="activity-container" class="grid gap-3">
-          <div class="text-center py-10 text-gray-400 text-sm italic">กำลังโหลดรายการกิจกรรม...</div>
-        </div>
-      </section>
-
-      <section id="tab-check" class="hidden space-y-4">
-        <div class="bg-white p-6 rounded-[2rem] shadow-md border border-slate-100 text-center">
-          <div id="reader" class="mb-4 bg-slate-100 min-h-[280px]"></div>
-          <div id="scanned-result" class="hidden p-4 bg-indigo-50 text-indigo-700 rounded-2xl mb-4 font-bold border border-indigo-200"></div>
-          
-          <div class="flex gap-3 mb-6">
-            <label class="flex-1 p-3 border rounded-xl cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white transition-all">
-              <input name="ctype" type="radio" value="เข้า" checked class="hidden"> เช็คเข้า
-            </label>
-            <label class="flex-1 p-3 border rounded-xl cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white transition-all">
-              <input name="ctype" type="radio" value="ออก" class="hidden"> เช็คออก
-            </label>
-          </div>
-          <button id="btn-scan" onclick="startScanner()" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold mb-3 shadow-lg">เปิดกล้องสแกน</button>
-          <button id="btn-save" onclick="handleCheckin()" class="hidden w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold shadow-xl animate-bounce">บันทึกข้อมูลเข้าชีต</button>
-        </div>
+    <main class="flex-1 p-6 overflow-y-auto">
+      <section id="tab-list">
+        <h3 class="font-bold text-gray-700 mb-4">📅 กิจกรรมปัจจุบัน</h3>
+        <div id="activity-container" class="space-y-3"></div>
       </section>
 
       <section id="tab-user" class="hidden flex flex-col items-center">
-        <div class="relative mb-8 group">
-          <div class="w-40 h-40 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-slate-200 ring-4 ring-indigo-50">
+        <div class="relative mb-6">
+          <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-slate-200">
             <img id="u-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-full h-full object-cover">
           </div>
-          <label class="absolute bottom-2 right-2 bg-indigo-600 p-3 rounded-full shadow-lg cursor-pointer hover:bg-indigo-700 transition">
-            <input type="file" id="photo-input" class="hidden" accept="image/*" onchange="uploadPhoto(this)">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+          <label class="absolute bottom-0 right-0 bg-indigo-600 p-2 rounded-full cursor-pointer">
+            <input type="file" id="photo-input" class="hidden" accept="image/*" onchange="uploadPhoto(this)">📷
           </label>
         </div>
-        <div class="bg-white p-8 rounded-[2.5rem] w-full text-center shadow-lg border border-slate-100">
-          <p class="text-gray-400 text-xs uppercase tracking-widest mb-1">ชั่วโมงสะสม</p>
-          <h2 id="u-hours" class="text-7xl font-black text-indigo-600 mb-4">0</h2>
-          <p id="u-name" class="font-bold text-xl text-gray-800"></p>
-          <p id="u-id" class="text-sm text-gray-400 mt-1"></p>
+        <div class="bg-white p-8 rounded-3xl w-full text-center shadow-sm">
+          <p class="text-xs text-gray-400">ชั่วโมงสะสม</p>
+          <h2 id="u-hours" class="text-6xl font-black text-indigo-600 my-2">0</h2>
+          <p id="u-name" class="font-bold text-lg"></p>
         </div>
       </section>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-3 pb-8 z-50">
-      <button onclick="showTab('list')" id="n-list" class="flex-1 flex flex-col items-center nav-active transition-all">
-        <span class="text-xl">🏠</span><span class="text-[10px] font-bold">กิจกรรม</span>
-      </button>
-      <button onclick="showTab('check')" id="n-check" class="flex-1 flex flex-col items-center text-slate-400 transition-all border-t-3 border-transparent">
-        <span class="text-xl">📸</span><span class="text-[10px] font-bold">เช็คชื่อ</span>
-      </button>
-      <button onclick="showTab('user')" id="n-user" class="flex-1 flex flex-col items-center text-slate-400 transition-all border-t-3 border-transparent">
-        <span class="text-xl">👤</span><span class="text-[10px] font-bold">บัญชี</span>
-      </button>
+    <nav class="bg-white border-t flex justify-around py-4">
+      <button onclick="showTab('list')" id="n-list" class="flex-1 text-center nav-active">🏠<br><span class="text-[10px]">กิจกรรม</span></button>
+      <button onclick="showTab('user')" id="n-user" class="flex-1 text-center text-gray-400">👤<br><span class="text-[10px]">โปรไฟล์</span></button>
     </nav>
   </div>
 
   <script>
-    const SCRIPT_URL = "ใส่_URL_WEB_APP_ที่นี่"; // *** สำคัญมาก: ใส่ URL ที่ได้จาก Apps Script ***
-    let currentUser = null, html5QrCode = null, scannedActivity = "";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3R8tEo_bXglQeGfbY6WLB-IvLxkwBDzrMn5cSnQYzjQn165M6wfMEL0-w72KD7l17/exec"; 
+    let currentUser = null;
 
     function toggleAuth(reg) {
       document.getElementById('login-form').classList.toggle('hidden', reg);
@@ -116,119 +79,53 @@
     }
 
     function showTab(name) {
-      ['list', 'check', 'user'].forEach(t => {
+      ['list', 'user'].forEach(t => {
         document.getElementById('tab-'+t).classList.toggle('hidden', t !== name);
         document.getElementById('n-'+t).classList.toggle('nav-active', t === name);
-        if(t !== name) document.getElementById('n-'+t).classList.add('text-slate-400');
-        else document.getElementById('n-'+t).classList.remove('text-slate-400');
       });
-      if(name !== 'check' && html5QrCode) { 
-        html5QrCode.stop().then(() => { html5QrCode = null; }).catch(() => {}); 
-      }
       if(name === 'list') loadActivities();
     }
 
     async function handleLogin() {
       const sid = document.getElementById('sid').value;
       const pass = document.getElementById('pass').value;
-      if(!sid || !pass) return alert("กรุณากรอกข้อมูลให้ครบ");
-      
-      const btn = document.getElementById('btn-login');
-      btn.innerText = "กำลังเข้าสู่ระบบ...";
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "login", student_id: sid, password: pass })});
-        const r = await res.json();
-        if(r.success) {
-          currentUser = { id: sid, name: r.name };
-          document.getElementById('auth-screen').classList.add('hidden');
-          document.getElementById('app-screen').classList.remove('hidden');
-          document.getElementById('u-name').innerText = r.name;
-          document.getElementById('u-id').innerText = "รหัส: " + sid;
-          document.getElementById('u-hours').innerText = r.hours;
-          if(r.photoUrl) document.getElementById('u-img').src = r.photoUrl;
-          showTab('list');
-        } else { alert(r.message); }
-      } catch (e) { alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้"); }
-      btn.innerText = "เข้าสู่ระบบ"; btn.disabled = false;
+      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "login", student_id: sid, password: pass })});
+      const r = await res.json();
+      if(r.success) {
+        currentUser = { id: sid, name: r.name };
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+        document.getElementById('u-name').innerText = r.name;
+        document.getElementById('u-hours').innerText = r.hours;
+        if(r.photoUrl) document.getElementById('u-img').src = r.photoUrl;
+        showTab('list');
+      } else { alert(r.message); }
     }
 
+    // แก้ปัญหา Uncaught ReferenceError: handleRegister is not defined
     async function handleRegister() {
       const sid = document.getElementById('r-sid').value;
       const name = document.getElementById('r-name').value;
       const pass = document.getElementById('r-pass').value;
-      if(!sid || !name || !pass) return alert("กรุณากรอกข้อมูลให้ครบ");
-
-      const btn = document.getElementById('btn-reg');
-      btn.innerText = "กำลังบันทึก...";
-      try {
-        const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "register", student_id: sid, student_name: name, password: pass })});
-        const r = await res.json();
-        if(r.success) { alert("ลงทะเบียนสำเร็จ! เข้าสู่ระบบได้เลย"); toggleAuth(false); }
-      } catch (e) { alert("เกิดข้อผิดพลาด"); }
-      btn.innerText = "ยืนยันข้อมูล";
+      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "register", student_id: sid, student_name: name, password: pass })});
+      const r = await res.json();
+      if(r.success) { alert("ลงทะเบียนสำเร็จ!"); toggleAuth(false); }
     }
 
     async function loadActivities() {
-      const container = document.getElementById('activity-container');
-      try {
-        const res = await fetch(SCRIPT_URL);
-        const list = await res.json();
-        container.innerHTML = list.map(item => `
-          <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center group active:bg-indigo-50 transition">
-            <span class="font-bold text-gray-700">${item}</span>
-            <span class="text-[9px] font-bold bg-green-100 text-green-600 px-3 py-1 rounded-full uppercase">พร้อมสแกน</span>
-          </div>
-        `).join('') || "<div class='text-center text-gray-400 text-xs py-10'>ไม่มีกิจกรรมเปิดอยู่</div>";
-      } catch (e) { container.innerHTML = "<div class='text-red-400 text-xs text-center'>โหลดข้อมูลล้มเหลว</div>"; }
-    }
-
-    function startScanner() {
-      if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
-        scannedActivity = text;
-        document.getElementById('scanned-result').innerText = "🚩 สแกนพบ: " + text;
-        document.getElementById('scanned-result').classList.remove('hidden');
-        document.getElementById('btn-save').classList.remove('hidden');
-        html5QrCode.stop();
-      }).catch(() => alert("กรุณาอนุญาตการเข้าถึงกล้อง"));
-    }
-
-    async function handleCheckin() {
-      const btn = document.getElementById('btn-save');
-      btn.innerText = "กำลังส่งพิกัด GPS...";
-      btn.disabled = true;
-
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        try {
-          await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
-            action: "checkin", student_id: currentUser.id, student_name: currentUser.name,
-            activity_name: scannedActivity, check_type: document.querySelector('input[name="ctype"]:checked').value,
-            latitude: pos.coords.latitude, longitude: pos.coords.longitude
-          })});
-          alert("✅ บันทึก " + scannedActivity + " สำเร็จ!");
-          showTab('list');
-        } catch (e) { alert("บันทึกไม่สำเร็จ"); }
-        btn.disabled = false; btn.innerText = "บันทึกข้อมูลเข้าชีต";
-      }, () => { alert("กรุณาเปิด GPS และอนุญาตการเข้าถึงตำแหน่ง"); btn.disabled = false; }, { enableHighAccuracy: true });
+      const res = await fetch(SCRIPT_URL);
+      const list = await res.json();
+      document.getElementById('activity-container').innerHTML = list.map(item => `
+        <div class="p-4 bg-white rounded-2xl shadow-sm border-l-4 border-indigo-500 font-bold text-gray-700">${item}</div>
+      `).join('');
     }
 
     async function uploadPhoto(input) {
-      if (!input.files[0]) return;
-      const img = document.getElementById('u-img');
-      img.style.opacity = "0.3";
       const reader = new FileReader();
       reader.onload = async (e) => {
-        try {
-          const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({
-            action: "uploadPhoto", student_id: currentUser.id,
-            image: e.target.result.split(',')[1], mimeType: input.files[0].type
-          })});
-          const r = await res.json();
-          if(r.success) img.src = r.photoUrl + "?t=" + new Date().getTime();
-        } catch (e) { alert("อัปโหลดไม่สำเร็จ"); }
-        img.style.opacity = "1";
+        const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "uploadPhoto", student_id: currentUser.id, image: e.target.result.split(',')[1], mimeType: input.files[0].type })});
+        const r = await res.json();
+        if(r.success) document.getElementById('u-img').src = r.photoUrl;
       };
       reader.readAsDataURL(input.files[0]);
     }
