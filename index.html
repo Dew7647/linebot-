@@ -29,8 +29,8 @@
       <input type="text" id="r-sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-xl">
       <input type="text" id="r-name" placeholder="ชื่อ-นามสกุล" class="w-full p-4 mb-4 border rounded-xl">
       <input type="password" id="r-pass" placeholder="ตั้งรหัสวันเกิด" class="w-full p-4 mb-6 border rounded-xl">
-      <button onclick="handleRegister()" id="btn-reg" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold">ยืนยัน</button>
-      <button onclick="toggleAuth(false)" class="w-full text-center text-sm text-gray-400 mt-4 underline">กลับไป Login</button>
+      <button onclick="handleRegister()" id="btn-reg" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold">ยืนยันการลงทะเบียน</button>
+      <button onclick="toggleAuth(false)" class="w-full text-center text-sm text-gray-400 mt-4 underline">กลับไปหน้า Login</button>
     </div>
   </div>
 
@@ -41,69 +41,55 @@
     </header>
 
     <main class="flex-1 p-6 overflow-y-auto pb-24">
-      <section id="tab-list" class="space-y-4">
-        <div class="flex flex-col gap-2">
-           <h3 class="font-bold text-gray-700">📅 กิจกรรมปัจจุบัน</h3>
-           <select id="month-filter" onchange="filterActivities()" class="p-3 rounded-xl border-none shadow-sm bg-white font-bold text-indigo-600">
-             <option value="all">แสดงทุกเดือน</option>
-             <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option>
-             <option value="03">มีนาคม</option><option value="04">เมษายน</option>
-             <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option>
-             <option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
-             <option value="09">กันยายน</option><option value="10">ตุลาคม</option>
-             <option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
-           </select>
+      <section id="tab-list">
+        <div class="mb-4">
+          <label class="text-xs font-bold text-gray-400 mb-2 block">เลือกเดือนกิจกรรม</label>
+          <select id="month-filter" onchange="filterActivities()" class="w-full p-3 rounded-xl bg-white border-none shadow-sm font-bold text-indigo-600">
+            <option value="all">แสดงทุกเดือน</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option>
+            <option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option>
+            <option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option>
+            <option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
         </div>
-        <div id="activity-container" class="space-y-3">
-          <p class="text-xs text-gray-400 text-center py-10">กำลังดึงข้อมูล...</p>
-        </div>
+        <div id="activity-container" class="space-y-3"></div>
       </section>
 
-      <section id="tab-check" class="hidden space-y-4">
-        <div class="bg-white p-6 rounded-3xl shadow-sm text-center">
-          <div id="reader" class="mb-4 bg-slate-100 rounded-2xl overflow-hidden min-h-[250px]"></div>
-          <div id="scanned-result" class="hidden p-4 bg-indigo-50 text-indigo-700 rounded-xl mb-4 font-bold"></div>
-          <div class="flex gap-4 mb-4">
-            <label class="flex-1 p-4 border rounded-xl cursor-pointer has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500">
-              <input name="ctype" type="radio" value="เข้า" checked class="hidden"> เข้า
-            </label>
-            <label class="flex-1 p-4 border rounded-xl cursor-pointer has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500">
-              <input name="ctype" type="radio" value="ออก" class="hidden"> ออก
-            </label>
-          </div>
-          <button onclick="startScanner()" class="w-full py-4 bg-slate-800 text-white rounded-xl font-bold mb-2">เปิดกล้อง</button>
-          <button id="btn-save" onclick="handleCheckin()" class="hidden w-full py-5 bg-indigo-600 text-white rounded-xl font-bold shadow-xl">บันทึกพิกัด</button>
+      <section id="tab-check" class="hidden">
+        <div id="reader" class="rounded-2xl overflow-hidden shadow-md bg-white mb-4"></div>
+        <div id="scanned-result" class="hidden p-4 bg-green-100 text-green-700 rounded-xl mb-4 font-bold text-center"></div>
+        <div class="flex gap-4 mb-4">
+          <label class="flex-1 p-4 bg-white border rounded-xl text-center font-bold"><input type="radio" name="ctype" value="เข้า" checked> เข้า</label>
+          <label class="flex-1 p-4 bg-white border rounded-xl text-center font-bold"><input type="radio" name="ctype" value="ออก"> ออก</label>
         </div>
+        <button onclick="startScanner()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold shadow-lg">เปิดกล้องสแกน</button>
+        <button id="btn-save" onclick="handleCheckin()" class="hidden w-full py-4 bg-emerald-500 text-white rounded-xl font-bold mt-4 shadow-lg">บันทึกข้อมูลและ GPS</button>
       </section>
 
-      <section id="tab-user" class="hidden flex flex-col items-center">
-        <div class="relative mb-6">
-          <div class="w-32 h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-slate-200">
-            <img id="u-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-full h-full object-cover">
-          </div>
-          <label class="absolute bottom-0 right-0 bg-indigo-600 p-2 rounded-full cursor-pointer shadow-lg">
-            <input type="file" class="hidden" accept="image/*" onchange="uploadPhoto(this)">📷
-          </label>
+      <section id="tab-user" class="hidden text-center">
+        <div class="w-32 h-32 bg-slate-300 rounded-full mx-auto mb-4 border-4 border-white shadow-lg overflow-hidden">
+          <img id="u-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-full h-full object-cover">
         </div>
-        <div class="bg-white p-8 rounded-3xl w-full text-center shadow-md">
-          <p class="text-xs text-gray-400">ชั่วโมงกิจกรรม</p>
-          <h2 id="u-hours" class="text-6xl font-black text-indigo-600 my-2">0</h2>
-          <p id="u-name" class="font-bold text-lg"></p>
-          <p id="u-id" class="text-xs text-gray-300 mt-1"></p>
-        </div>
+        <h2 id="u-name" class="text-xl font-bold">Username</h2>
+        <p id="u-hours" class="text-4xl font-black text-indigo-600 my-2">0</p>
+        <p class="text-xs text-gray-400">ชั่วโมงสะสม</p>
       </section>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-4 pb-8">
-      <button onclick="showTab('list')" id="n-list" class="flex-1 text-center nav-active">📅<br><span class="text-[10px] font-bold">กิจกรรม</span></button>
-      <button onclick="showTab('check')" id="n-check" class="flex-1 text-center text-slate-400">📸<br><span class="text-[10px] font-bold">สแกน</span></button>
-      <button onclick="showTab('user')" id="n-user" class="flex-1 text-center text-slate-400">👤<br><span class="text-[10px] font-bold">โปรไฟล์</span></button>
+    <nav class="fixed bottom-0 w-full bg-white border-t flex justify-around py-3 shadow-2xl">
+      <button onclick="showTab('list')" id="n-list" class="flex-1 text-center nav-active text-sm font-bold">กิจกรรม</button>
+      <button onclick="showTab('check')" id="n-check" class="flex-1 text-center text-gray-400 text-sm font-bold">สแกน</button>
+      <button onclick="showTab('user')" id="n-user" class="flex-1 text-center text-gray-400 text-sm font-bold">โปรไฟล์</button>
     </nav>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyx_dknBlVMOYpVOx3fU34lgMVXxNmvfKDfePDz7HKskC6f06d1CPY9TcwFoVozL4k/exec"; 
-    let currentUser = null, html5QrCode = null, scannedActivity = "";
+    // *** แก้ไข URL ตรงนี้ ***
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_aA3F36QPIrOD1hzJ3PXK7J0ZK-ywdRZAhgTcB17j31HZNAZCnNc8FFwIDwocRVm_/exec"; 
+    
+    let currentUser = null, scannedActivity = "", html5QrCode = null;
 
     function toggleAuth(reg) {
       document.getElementById('login-form').classList.toggle('hidden', reg);
@@ -114,10 +100,32 @@
       ['list', 'check', 'user'].forEach(t => {
         document.getElementById('tab-'+t).classList.toggle('hidden', t !== name);
         document.getElementById('n-'+t).classList.toggle('nav-active', t === name);
-        if(t !== name) document.getElementById('n-'+t).classList.add('text-slate-400');
+        if(t !== name) document.getElementById('n-'+t).classList.add('text-gray-400');
       });
-      if(name !== 'check' && html5QrCode) html5QrCode.stop().catch(()=>{});
       if(name === 'list') loadActivities();
+    }
+
+    // ฟังก์ชันลงทะเบียน (ที่เคย Error)
+    async function handleRegister() {
+      const sid = document.getElementById('r-sid').value;
+      const name = document.getElementById('r-name').value;
+      const pass = document.getElementById('r-pass').value;
+      const btn = document.getElementById('btn-reg');
+
+      if(!sid || !name || !pass) return alert("กรุณากรอกข้อมูลให้ครบ");
+
+      btn.disabled = true; btn.innerText = "กำลังบันทึก...";
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({ action: "register", student_id: sid, student_name: name, password: pass })
+        });
+        alert("ลงทะเบียนเรียบร้อย! ลอง Login ดูครับ");
+        toggleAuth(false);
+      } catch(e) { alert("Error: " + e); }
+      btn.disabled = false; btn.innerText = "ยืนยันการลงทะเบียน";
     }
 
     async function handleLogin() {
@@ -126,12 +134,10 @@
       const r = await res.json();
       if(r.success) {
         currentUser = { id: sid, name: r.name };
+        document.getElementById('u-name').innerText = r.name;
+        document.getElementById('u-hours').innerText = r.hours;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
-        document.getElementById('u-name').innerText = r.name;
-        document.getElementById('u-id').innerText = "ID: " + sid;
-        document.getElementById('u-hours').innerText = r.hours;
-        if(r.photoUrl) document.getElementById('u-img').src = r.photoUrl;
         showTab('list');
       } else alert(r.message);
     }
@@ -141,22 +147,16 @@
       const list = await res.json();
       const container = document.getElementById('activity-container');
       container.innerHTML = list.map(item => `
-        <div class="activity-card p-4 bg-white rounded-2xl shadow-sm border-l-4 border-indigo-500 font-bold text-gray-700" data-month="${item.month}">
-          ${item.name}
-          <div class="text-[10px] text-gray-300">เดือน: ${item.month}</div>
+        <div class="activity-card p-4 bg-white rounded-2xl shadow-sm border-l-4 border-indigo-500 font-bold" data-month="${item.month}">
+          ${item.name} <span class="text-[10px] text-gray-300 ml-2">(เดือน ${item.month})</span>
         </div>
       `).join('');
     }
 
     function filterActivities() {
-      const selected = document.getElementById('month-filter').value;
-      const cards = document.querySelectorAll('.activity-card');
-      cards.forEach(card => {
-        if (selected === "all" || card.getAttribute('data-month') === selected) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
+      const val = document.getElementById('month-filter').value;
+      document.querySelectorAll('.activity-card').forEach(c => {
+        c.classList.toggle('hidden', val !== 'all' && c.getAttribute('data-month') !== val);
       });
     }
 
@@ -164,26 +164,25 @@
       html5QrCode = new Html5Qrcode("reader");
       html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
         scannedActivity = text;
-        document.getElementById('scanned-result').innerText = "📍 " + text;
+        document.getElementById('scanned-result').innerText = "กิจกรรม: " + text;
         document.getElementById('scanned-result').classList.remove('hidden');
         document.getElementById('btn-save').classList.remove('hidden');
         html5QrCode.stop();
-      }).catch(e => alert("เปิดกล้องไม่ได้"));
+      });
     }
 
     async function handleCheckin() {
       navigator.geolocation.getCurrentPosition(async (pos) => {
+        const type = document.querySelector('input[name="ctype"]:checked').value;
         await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
           action: "checkin", student_id: currentUser.id, student_name: currentUser.name,
-          activity_name: scannedActivity, check_type: document.querySelector('input[name="ctype"]:checked').value,
+          activity_name: scannedActivity, check_type: type,
           latitude: pos.coords.latitude, longitude: pos.coords.longitude
         })});
-        alert("บันทึกสำเร็จ!");
-        showTab('list');
-      }, () => alert("กรุณาเปิด GPS"), { enableHighAccuracy: true });
+        alert("บันทึก " + type + " สำเร็จ!");
+        location.reload();
+      });
     }
-    // ... ฟังก์ชัน uploadPhoto ใช้โค้ดเดิม ...
   </script>
 </body>
 </html>
-
