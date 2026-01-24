@@ -7,90 +7,96 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Sarabun', sans-serif; }
-    .hidden { display: none !important; }
-    .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; }
-  </style>
+  <style> body { font-family: 'Sarabun', sans-serif; } .hidden { display: none !important; } .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; } </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
 
   <div id="auth-screen" class="flex-1 flex flex-col items-center justify-center p-6 bg-indigo-600">
     <div id="login-form" class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm">
       <h2 class="text-2xl font-bold text-center mb-6">เข้าสู่ระบบ</h2>
-      <input type="text" id="sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-xl outline-none">
-      <input type="password" id="pass" placeholder="วันเกิด (ววดดปปปป)" class="w-full p-4 mb-6 border rounded-xl outline-none">
-      <button onclick="handleLogin()" id="btn-login" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold">Login</button>
-      <button onclick="toggleAuth(true)" class="w-full text-sm text-gray-400 mt-4 underline">ลงทะเบียนใหม่</button>
+      <input type="text" id="sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-xl outline-none shadow-sm">
+      <input type="password" id="pass" placeholder="วันเกิด (ววดดปปปป)" class="w-full p-4 mb-6 border rounded-xl outline-none shadow-sm">
+      <button onclick="handleLogin()" id="btn-login" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold shadow-lg active:scale-95 transition">Login</button>
+      <button onclick="toggleAuth(true)" class="w-full text-sm text-gray-400 mt-4 underline text-center">ลงทะเบียนสมาชิกใหม่</button>
     </div>
-
     <div id="reg-form" class="hidden bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm">
       <h2 class="text-2xl font-bold text-center text-emerald-600 mb-6">ลงทะเบียน</h2>
       <input type="text" id="r-sid" placeholder="รหัสนักศึกษา" class="w-full p-4 mb-4 border rounded-xl">
       <input type="text" id="r-name" placeholder="ชื่อ-นามสกุล" class="w-full p-4 mb-4 border rounded-xl">
       <input type="password" id="r-pass" placeholder="วันเกิด (ววดดปปปป)" class="w-full p-4 mb-6 border rounded-xl">
-      <button onclick="handleRegister()" id="btn-reg" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold">ยืนยัน</button>
-      <button onclick="toggleAuth(false)" class="w-full text-sm text-gray-400 mt-4 underline">กลับไปหน้า Login</button>
+      <button onclick="handleRegister()" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold shadow-lg">ยืนยันลงทะเบียน</button>
+      <button onclick="toggleAuth(false)" class="w-full text-sm text-gray-400 mt-4 underline text-center">กลับหน้า Login</button>
     </div>
   </div>
 
   <div id="app-screen" class="hidden flex-1 flex flex-col overflow-hidden">
     <header class="bg-white p-4 border-b flex justify-between items-center shadow-sm">
-      <span class="font-bold text-indigo-600">S-ACTIVITY</span>
-      <button onclick="location.reload()" class="text-xs font-bold text-red-500">Log out</button>
+      <span class="font-bold text-indigo-600 text-lg">S-ACTIVITY</span>
+      <button onclick="location.reload()" class="text-xs font-bold text-red-500 border border-red-500 px-3 py-1 rounded-full">ออกจากระบบ</button>
     </header>
 
     <main class="flex-1 p-6 overflow-y-auto pb-24">
+      
       <section id="tab-list">
-        <select id="month-filter" onchange="filterActivities()" class="w-full p-4 mb-4 rounded-xl border-none shadow-sm bg-white font-bold text-indigo-600">
-          <option value="all">กิจกรรมทุกเดือน</option>
-          <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option>
-          </select>
-        <div id="activity-container" class="space-y-3"></div>
+        <label class="block text-xs font-bold text-gray-400 mb-2 ml-1">เลือกเดือนที่ต้องการดู</label>
+        <select id="month-filter" onchange="filterActivities()" class="w-full p-4 mb-6 rounded-2xl border-none shadow-md bg-white font-bold text-indigo-600 outline-none">
+          <option value="all">แสดงกิจกรรมทั้งหมด</option>
+          <option value="01">มกราคม (01)</option>
+          <option value="02">กุมภาพันธ์ (02)</option>
+          <option value="03">มีนาคม (03)</option>
+          <option value="04">เมษายน (04)</option>
+          <option value="05">พฤษภาคม (05)</option>
+          <option value="06">มิถุนายน (06)</option>
+          <option value="07">กรกฎาคม (07)</option>
+          <option value="08">สิงหาคม (08)</option>
+          <option value="09">กันยายน (09)</option>
+          <option value="10">ตุลาคม (10)</option>
+          <option value="11">พฤศจิกายน (11)</option>
+          <option value="12">ธันวาคม (12)</option>
+        </select>
+        <div id="activity-container" class="space-y-4"></div>
       </section>
 
       <section id="tab-check" class="hidden text-center">
-        <div id="reader" class="rounded-2xl overflow-hidden bg-black mb-4 min-h-[250px]"></div>
-        <div id="scanned-result" class="hidden p-4 bg-green-50 text-green-700 rounded-xl mb-4 font-bold"></div>
-        <div class="flex gap-4 mb-4">
-          <label class="flex-1 p-4 bg-white border rounded-xl font-bold"><input name="ctype" type="radio" value="เข้า" checked> เข้า</label>
-          <label class="flex-1 p-4 bg-white border rounded-xl font-bold"><input name="ctype" type="radio" value="ออก"> ออก</label>
+        <div id="reader" class="rounded-3xl overflow-hidden bg-black mb-6 shadow-2xl aspect-square border-4 border-white"></div>
+        <div id="scanned-result" class="hidden p-5 bg-indigo-50 text-indigo-700 rounded-2xl mb-6 font-bold border-2 border-indigo-200"></div>
+        <div class="flex gap-4 mb-6">
+          <label class="flex-1 p-4 bg-white border-2 rounded-2xl font-bold cursor-pointer shadow-sm"><input name="ctype" type="radio" value="เข้า" checked class="scale-125 mr-2"> เข้า</label>
+          <label class="flex-1 p-4 bg-white border-2 rounded-2xl font-bold cursor-pointer shadow-sm"><input name="ctype" type="radio" value="ออก" class="scale-125 mr-2"> ออก</label>
         </div>
-        <button onclick="startScanner()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold shadow-lg">เปิดกล้องสแกน</button>
-        <button id="btn-save" onclick="handleCheckin()" class="hidden w-full py-4 bg-emerald-500 text-white rounded-xl font-bold mt-4 shadow-lg">ยืนยันและบันทึก GPS</button>
+        <button onclick="startScanner()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold shadow-xl text-lg">เปิดกล้องสแกน QR</button>
+        <button id="btn-save" onclick="handleCheckin()" class="hidden w-full py-5 bg-emerald-500 text-white rounded-2xl font-bold mt-4 shadow-xl text-lg animate-pulse">ยืนยันพิกัดและบันทึก</button>
       </section>
 
       <section id="tab-user" class="hidden flex flex-col items-center">
-        <div class="relative mb-6">
-          <div class="w-32 h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-slate-200">
+        <div class="relative mb-8 mt-4">
+          <div class="w-40 h-40 rounded-full border-8 border-white shadow-2xl overflow-hidden bg-slate-200">
             <img id="u-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="w-full h-full object-cover">
           </div>
-          <label class="absolute bottom-0 right-0 bg-indigo-600 p-2 rounded-full cursor-pointer shadow-lg text-white">
+          <label class="absolute bottom-1 right-1 bg-indigo-600 p-3 rounded-full cursor-pointer shadow-lg text-white">
             <input type="file" class="hidden" accept="image/*" onchange="uploadPhoto(this)">📷
           </label>
         </div>
-        <div class="bg-white p-8 rounded-3xl w-full text-center shadow-md">
-          <h2 id="u-hours" class="text-6xl font-black text-indigo-600 mb-2">0</h2>
-          <p class="text-xs text-gray-400 mb-4 font-bold uppercase">Activity Hours</p>
-          <p id="u-name" class="font-bold text-lg text-slate-700"></p>
+        <div class="bg-white p-8 rounded-[40px] w-full text-center shadow-xl border border-slate-100">
+          <h2 id="u-hours" class="text-7xl font-black text-indigo-600 mb-2">0</h2>
+          <p class="text-sm text-slate-400 font-bold tracking-widest uppercase mb-6">ชั่วโมงสะสม</p>
+          <p id="u-name" class="font-bold text-2xl text-slate-800"></p>
+          <p id="u-id-display" class="text-slate-400 mt-1"></p>
         </div>
       </section>
     </main>
 
-    <nav class="fixed bottom-0 w-full bg-white border-t flex justify-around py-4 shadow-2xl">
-      <button onclick="showTab('list')" id="n-list" class="flex-1 nav-active text-xs font-bold">LIST</button>
-      <button onclick="showTab('check')" id="n-check" class="flex-1 text-gray-400 text-xs font-bold">SCAN</button>
-      <button onclick="showTab('user')" id="n-user" class="flex-1 text-gray-400 text-xs font-bold">ME</button>
+    <nav class="fixed bottom-0 w-full bg-white/80 backdrop-blur-md border-t flex justify-around py-4 shadow-lg">
+      <button onclick="showTab('list')" id="n-list" class="flex-1 nav-active text-xs font-bold">กิจกรรม</button>
+      <button onclick="showTab('check')" id="n-check" class="flex-1 text-gray-400 text-xs font-bold">สแกน</button>
+      <button onclick="showTab('user')" id="n-user" class="flex-1 text-gray-400 text-xs font-bold">โปรไฟล์</button>
     </nav>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0rTDcyxzROgMU8IfmWSS0sMGHOOxxvBRKiiLY0cYD28LdT8J3BGlPkkXgO_M3Jn7v/exec";
-    const TARGET_LAT = 13.123456; // เปลี่ยนเป็นพิกัดจริง
-    const TARGET_LNG = 100.123456; // เปลี่ยนเป็นพิกัดจริง
-    const MAX_DISTANCE = 100; // เมตร
-
-    let currentUser = null, scannedActivity = "", html5QrCode = null;
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUvDVtSdUjIAjXks4bC0n0xpC97dlpv-Mmwz9XgXHgT4yITMH9xgxv7Uhqn8PzbQq5/exec"; 
+    const MAX_DISTANCE = 100; // รัศมี 100 เมตร
+    let currentUser = null, allActivities = [], scannedActivity = "", html5QrCode = null;
 
     function toggleAuth(reg) {
       document.getElementById('login-form').classList.toggle('hidden', reg);
@@ -104,15 +110,18 @@
         if(t !== name) document.getElementById('n-'+t).classList.add('text-gray-400');
       });
       if(name === 'list') loadActivities();
+      if(html5QrCode && name !== 'check') { html5QrCode.stop(); document.getElementById('btn-save').classList.add('hidden'); }
     }
 
     async function handleLogin() {
       const sid = document.getElementById('sid').value, pass = document.getElementById('pass').value;
+      if(!sid || !pass) return alert("กรุณากรอกรหัสนักศึกษาและวันเกิด");
       const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "login", student_id: sid, password: pass })});
       const r = await res.json();
       if(r.success) {
         currentUser = { id: sid, name: r.name };
         document.getElementById('u-name').innerText = r.name;
+        document.getElementById('u-id-display').innerText = "ID: " + sid;
         document.getElementById('u-hours').innerText = r.hours;
         if(r.photoUrl) document.getElementById('u-img').src = r.photoUrl;
         document.getElementById('auth-screen').classList.add('hidden');
@@ -125,19 +134,20 @@
       const sid = document.getElementById('r-sid').value, name = document.getElementById('r-name').value, pass = document.getElementById('r-pass').value;
       if(!sid || !name || !pass) return alert("กรุณากรอกข้อมูลให้ครบ");
       await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "register", student_id: sid, student_name: name, password: pass })});
-      alert("ลงทะเบียนสำเร็จ! เข้าสู่ระบบได้เลย");
-      toggleAuth(false);
+      alert("ลงทะเบียนสำเร็จ!"); toggleAuth(false);
     }
 
     async function loadActivities() {
       const res = await fetch(SCRIPT_URL);
-      const list = await res.json();
+      allActivities = await res.json();
       const container = document.getElementById('activity-container');
-      container.innerHTML = list.map(item => `
-        <div class="activity-card p-5 bg-white rounded-2xl shadow-sm border-l-8 border-indigo-500 font-bold" data-month="${item.month}">
-          ${item.name} <span class="text-[10px] text-gray-300 block">MONTH CODE: ${item.month}</span>
+      container.innerHTML = allActivities.map(item => `
+        <div class="activity-card p-6 bg-white rounded-2xl shadow-sm border-l-8 border-indigo-500 font-bold" data-month="${item.month}">
+          <div class="text-indigo-600 text-lg">${item.name}</div>
+          <div class="text-xs text-slate-400 mt-1">📍 ${item.location} | เดือน: ${item.month}</div>
         </div>
       `).join('');
+      filterActivities();
     }
 
     function filterActivities() {
@@ -148,14 +158,17 @@
     }
 
     function startScanner() {
+      document.getElementById('btn-save').classList.add('hidden');
+      document.getElementById('scanned-result').classList.add('hidden');
+      if(html5QrCode) html5QrCode.stop();
       html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+      html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
         scannedActivity = text;
-        document.getElementById('scanned-result').innerText = "📍 " + text;
+        document.getElementById('scanned-result').innerText = "🏁 กิจกรรม: " + text;
         document.getElementById('scanned-result').classList.remove('hidden');
         document.getElementById('btn-save').classList.remove('hidden');
         html5QrCode.stop();
-      });
+      }).catch(err => alert("ไม่สามารถเข้าถึงกล้องได้"));
     }
 
     function getDistance(lat1, lon1, lat2, lon2) {
@@ -167,9 +180,24 @@
     }
 
     async function handleCheckin() {
+      const btn = document.getElementById('btn-save');
+      btn.disabled = true; btn.innerText = "กำลังตรวจพิกัด GPS...";
+
+      // ค้นหากิจกรรมจากชื่อที่สแกน (ใช้ trim เพื่อความแม่นยำ)
+      const activityData = allActivities.find(a => a.name.trim() === scannedActivity.trim());
+      if(!activityData || !activityData.coords) {
+        alert("❌ ไม่พบพิกัดกิจกรรมใน 'ชีต3' คอลัมน์ D");
+        btn.disabled = false; btn.innerText = "ยืนยันพิกัดและบันทึก"; return;
+      }
+
+      const [tLat, tLng] = activityData.coords.split(',').map(Number);
+
       navigator.geolocation.getCurrentPosition(async (pos) => {
-        const dist = getDistance(pos.coords.latitude, pos.coords.longitude, TARGET_LAT, TARGET_LNG);
-        if(dist > MAX_DISTANCE) return alert(`❌ คุณอยู่ไกลเกินไป (${Math.round(dist)} ม.) กรุณาเดินไปที่จุดจัดงาน`);
+        const dist = getDistance(pos.coords.latitude, pos.coords.longitude, tLat, tLng);
+        if(dist > MAX_DISTANCE) {
+          alert(`❌ ระยะห่างเกินกำหนด (${Math.round(dist)} เมตร)\nกรุณาเข้าใกล้จุดจัดงานมากกว่านี้`);
+          btn.disabled = false; btn.innerText = "ลองใหม่อีกครั้ง"; return;
+        }
         
         const type = document.querySelector('input[name="ctype"]:checked').value;
         await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
@@ -177,9 +205,9 @@
           activity_name: scannedActivity, check_type: type,
           latitude: pos.coords.latitude, longitude: pos.coords.longitude
         })});
-        alert("✅ บันทึก " + type + " สำเร็จ!");
+        alert("✅ เช็คชื่อสำเร็จที่: " + activityData.location);
         location.reload();
-      }, () => alert("กรุณาเปิด GPS"), { enableHighAccuracy: true });
+      }, () => { alert("กรุณาเปิด GPS"); btn.disabled = false; }, { enableHighAccuracy: true });
     }
 
     async function uploadPhoto(input) {
@@ -189,11 +217,10 @@
         const base64 = e.target.result.split(',')[1];
         const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "uploadPhoto", student_id: currentUser.id, image: base64, mimeType: input.files[0].type })});
         const r = await res.json();
-        if (r.success) { document.getElementById('u-img').src = r.photoUrl; alert("เปลี่ยนรูปสำเร็จ!"); }
+        if (r.success) { document.getElementById('u-img').src = r.photoUrl; alert("อัปเดตรูปโปรไฟล์แล้ว!"); }
       };
       reader.readAsDataURL(input.files[0]);
     }
   </script>
 </body>
 </html>
-
